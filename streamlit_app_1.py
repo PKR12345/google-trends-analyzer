@@ -272,8 +272,8 @@ with tabs_overall[0]:
             st.header("Interest Over Time")
             data_iot = st.session_state.google_trends_data.get('data_iot', pd.DataFrame())
             if not data_iot.empty:
-                st.line_chart(data_iot)
-                st.dataframe(data_iot)
+                st.line_chart(data_iot.drop(columns = ['isPartial'], axis =1))
+                st.dataframe(data_iot.drop(columns = ['isPartial'], axis =1))
             else:
                 st.write("No data available for the given parameters.")
         
