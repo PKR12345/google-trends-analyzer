@@ -27,7 +27,7 @@ if 'analysis_run' not in st.session_state:
 st.sidebar.title("Pytrends Configuration")
 keywords_input = st.sidebar.text_input(
     "Enter keywords (comma separated):", 
-    "Inflation, Trump",
+    "Inflation",
     help="""**kw_list**: Keywords to analyze (max 5). 
     - Example: ['Pizza', 'Italian']
     - Use pytrends.suggestions() for topic IDs
