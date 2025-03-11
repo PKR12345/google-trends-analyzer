@@ -164,311 +164,192 @@ tabs_overall = st.tabs(['Google Trends'])
 
 # Google Trends Tab
 with tabs_overall[0]:
-    # if st.sidebar.button("Run Analysis") or st.session_state.get('analysis_run', False):
-    #     st.session_state.analysis_run = True
-    with st.expander("User Manual 📘 - Click to Expand", expanded=False):
-        st.markdown("""
-        ## Google Trends Analysis Guide
-        
-        ### Overview
-        This tab helps analyze Google search trends and related news. It contains 4 sections:
-        1. Interest Over Time
-        2. Interest by Region
-        3. Keyword Suggestions
-        4. News Summaries
-        
-        ---
-        
-        ### 1. Interest Over Time 📈
-        **What it does:**  
-        - Shows search interest for your keywords over selected timeframe  
-        - Displays trends as interactive line chart  
-        - Shows raw data table below
-        
-        **How to use:**  
-        - Enter keywords in sidebar (comma-separated)  
-        - Adjust timeframe/region in sidebar  
-        - Hover over chart points for exact values  
-        - Scroll table to see historical data
-        
-        ---
-        
-        ### 2. Interest by Region 🌍  
-        **What it does:**  
-        - Shows regional interest distribution  
-        - Displays data in sortable table format  
-        - Higher values = more relative interest
-        
-        **Note:**  
-        - Works best with country-level regions (US, CN, etc.)  
-        - Blank results mean low search volume
-        
-        ---
-        
-        ### 3. Keyword Suggestions 💡  
-        **What it does:**  
-        - Provides related search terms  
-        - Helps discover new keywords  
-        - Shows Google's auto-suggestions
-        
-        **How to use:**  
-        1. Enter a seed keyword  
-        2. See suggestions in table  
-        3. Click interesting terms to copy
-        
-        ---
-        
-        ### 4. News Summaries 📰  
-        **What it does:**  
-        - Finds latest news for your keywords  
-        - Lets you select articles for AI analysis  
-        - Provides CPG industry impact assessment
-        
-        **Workflow:**  
-        1. See news results table  
-        2. Select article from dropdown  
-        3. Click "Generate Summary"  
-        4. Get:  
-           - Article summary  
-           - CPG industry impact analysis
-        
-        **Note:**  
-        - Summaries powered by Gemini AI  
-        - First generation may take 10-15 seconds
-        
-        ---
-        
-        ### General Tips 🔧
-        - Use sidebar for all configuration  
-        - Change parameters > click outside to refresh  
-        - Cached results speed up repeat use  
-        - API errors usually fix with retry  
-        - Hover over ❔ icons for help  
-        """)
-
-    current_params = {
-        'keywords': keywords,
-        'timeframe': timeframe,
-        'geo': geo,
-        'gprop': gprop,
-        'tz': tz,
-        'retries': retries,
-        'backoff_factor': backoff_factor
-    }
+    if st.sidebar.button("Run Analysis") or st.session_state.get('analysis_run', False):
+        st.session_state.analysis_run = True
+        with st.expander("User Manual 📘 - Click to Expand", expanded=False):
+            st.markdown("""
+            ## Google Trends Analysis Guide
+            
+            ### Overview
+            This tab helps analyze Google search trends and related news. It contains 4 sections:
+            1. Interest Over Time
+            2. Interest by Region
+            3. Keyword Suggestions
+            4. News Summaries
+            
+            ---
+            
+            ### 1. Interest Over Time 📈
+            **What it does:**  
+            - Shows search interest for your keywords over selected timeframe  
+            - Displays trends as interactive line chart  
+            - Shows raw data table below
+            
+            **How to use:**  
+            - Enter keywords in sidebar (comma-separated)  
+            - Adjust timeframe/region in sidebar  
+            - Hover over chart points for exact values  
+            - Scroll table to see historical data
+            
+            ---
+            
+            ### 2. Interest by Region 🌍  
+            **What it does:**  
+            - Shows regional interest distribution  
+            - Displays data in sortable table format  
+            - Higher values = more relative interest
+            
+            **Note:**  
+            - Works best with country-level regions (US, CN, etc.)  
+            - Blank results mean low search volume
+            
+            ---
+            
+            ### 3. Keyword Suggestions 💡  
+            **What it does:**  
+            - Provides related search terms  
+            - Helps discover new keywords  
+            - Shows Google's auto-suggestions
+            
+            **How to use:**  
+            1. Enter a seed keyword  
+            2. See suggestions in table  
+            3. Click interesting terms to copy
+            
+            ---
+            
+            ### 4. News Summaries 📰  
+            **What it does:**  
+            - Finds latest news for your keywords  
+            - Lets you select articles for AI analysis  
+            - Provides CPG industry impact assessment
+            
+            **Workflow:**  
+            1. See news results table  
+            2. Select article from dropdown  
+            3. Click "Generate Summary"  
+            4. Get:  
+               - Article summary  
+               - CPG industry impact analysis
+            
+            **Note:**  
+            - Summaries powered by Gemini AI  
+            - First generation may take 10-15 seconds
+            
+            ---
+            
+            ### General Tips 🔧
+            - Use sidebar for all configuration  
+            - Change parameters > click outside to refresh  
+            - Cached results speed up repeat use  
+            - API errors usually fix with retry  
+            - Hover over ❔ icons for help  
+            """)
     
-    if current_params != st.session_state.prev_params:
-        pytrends = TrendReq(hl='en-US', tz=tz, retries=retries, backoff_factor=backoff_factor)
-        if keywords:
-            pytrends.build_payload(keywords, cat=0, timeframe=timeframe, geo=geo, gprop=gprop)
-            try:
-                st.session_state.google_trends_data['data_iot'] = pytrends.interest_over_time()
-            except Exception as e:
-                st.error(f"Error retrieving Interest Over Time data: {e}")
-                st.session_state.google_trends_data['data_iot'] = pd.DataFrame()
-            try:
-                st.session_state.google_trends_data['data_ibr'] = pytrends.interest_by_region()
-            except Exception as e:
-                st.error(f"Error retrieving Interest by Region data: {e}")
-                st.session_state.google_trends_data['data_ibr'] = pd.DataFrame()
-        st.session_state.prev_params = current_params
-    
-    tabs = st.tabs(["Interest Over Time", "Interest by Region", "Keyword Suggestions", "Summary"])
-    
-    with tabs[0]:
-        st.header("Interest Over Time")
-        data_iot = st.session_state.google_trends_data.get('data_iot', pd.DataFrame())
-        if not data_iot.empty:
-            st.line_chart(data_iot)
-            st.dataframe(data_iot)
-        else:
-            st.write("No data available for the given parameters.")
-    
-    with tabs[1]:
-        st.header("Interest by Region")
-        data_ibr = st.session_state.google_trends_data.get('data_ibr', pd.DataFrame())
-        if not data_ibr.empty:
-            st.dataframe(data_ibr)
-        else:
-            st.write("No data available for the selected region.")
-    
-    with tabs[2]:
-        st.header("Keyword Suggestions")
-        suggestion_keyword = st.text_input("Enter a keyword for suggestions:", "Trump", key="suggestions")
-        if suggestion_keyword:
-            if suggestion_keyword in st.session_state.keyword_suggestions:
-                suggestions = st.session_state.keyword_suggestions[suggestion_keyword]
-            else:
+        current_params = {
+            'keywords': keywords,
+            'timeframe': timeframe,
+            'geo': geo,
+            'gprop': gprop,
+            'tz': tz,
+            'retries': retries,
+            'backoff_factor': backoff_factor
+        }
+        
+        if current_params != st.session_state.prev_params:
+            pytrends = TrendReq(hl='en-US', tz=tz, retries=retries, backoff_factor=backoff_factor)
+            if keywords:
+                pytrends.build_payload(keywords, cat=0, timeframe=timeframe, geo=geo, gprop=gprop)
                 try:
-                    pytrends = TrendReq(hl='en-US', tz=tz, retries=retries, backoff_factor=backoff_factor)
-                    suggestions = pytrends.suggestions(suggestion_keyword)
-                    st.session_state.keyword_suggestions[suggestion_keyword] = suggestions
+                    st.session_state.google_trends_data['data_iot'] = pytrends.interest_over_time()
                 except Exception as e:
-                    st.error(f"Error retrieving Keyword Suggestions: {e}")
-                    suggestions = []
-            if suggestions:
-                st.dataframe(pd.DataFrame(suggestions))
+                    st.error(f"Error retrieving Interest Over Time data: {e}")
+                    st.session_state.google_trends_data['data_iot'] = pd.DataFrame()
+                try:
+                    st.session_state.google_trends_data['data_ibr'] = pytrends.interest_by_region()
+                except Exception as e:
+                    st.error(f"Error retrieving Interest by Region data: {e}")
+                    st.session_state.google_trends_data['data_ibr'] = pd.DataFrame()
+            st.session_state.prev_params = current_params
+        
+        tabs = st.tabs(["Interest Over Time", "Interest by Region", "Keyword Suggestions", "Summary"])
+        
+        with tabs[0]:
+            st.header("Interest Over Time")
+            data_iot = st.session_state.google_trends_data.get('data_iot', pd.DataFrame())
+            if not data_iot.empty:
+                st.line_chart(data_iot)
+                st.dataframe(data_iot)
             else:
-                st.write("No suggestions found for the given keyword.")
-    
-    with tabs[3]:
-        try:
-            def extract_news_summary(topic, time_posted):
-                  utc_time = datetime.utcnow()
-                  # create client
-                  client = genai.Client(api_key=os.getenv("GEMINI_API_KEY","AIzaSyCJeqV2cNBq2m-ozeoaOw5JO88FhBfNhwc"))
-                
-                  prompt = f"""You are an experienced journalist, who has 30 plus year of experience in providing enriching and true news 
-                  to viewers around the world. Given an article topic provided by the user, your task to fetch all the information regarding
-                  the article and summerize it crisp and clear for the user. Also understand the information in detailed and provide your view
-                  on whether the information has any potential impact on the CPG Industry. You must return the response in the output format.
-                
-                  Output Format:
-                  <summary>
-                  [The summary goes here]
-                  <\summary>
-                  <impact_on_cpg_industry>
-                  [Your view on the impact on the CPG industry goes here]
-                  <\impact_on_cpg_industry>
-                
-                  Instructions:
-                  1. Make sure to provide the response in the output format.
-                  2. Think step by step and approach the problem intelligently to come with the final response.
-                  3. If you think that the information does not have any relation or does not impact the CPG industry, then mention your view as 'Not Applicable'. 
-                
-                  Conversation Date: Today is {utc_time}
-                  Time when article was posted: {time_posted}
-                  User Article Topic: {topic}
-                
-                  Response:
-                  """
-                  # Generate a list of cookie recipes
-                  response = client.models.generate_content(
-                      model='gemini-2.0-flash',
-                      contents=prompt,
-                      config={"tools": [{"google_search": {}}]},
-                  )
-                
-                  return response.text
-                
-            if keywords != st.session_state.get('news_keywords', []):
-                summary_dict = {}
-                for keyword in keywords:
-                    search = GoogleSerperAPIWrapper(type="news")
-                    results = search.results(keyword)
-                    news_data = {
-                        'Title': [n.get('title', '') for n in results.get('news', [])],
-                        'Link': [n.get('link', '') for n in results.get('news', [])],
-                        'Date': [n.get('date', '') for n in results.get('news', [])],
-                        'Source': [n.get('source', '') for n in results.get('news', [])]
-                    }
-                    summary_dict[keyword] = pd.DataFrame(news_data)
-                st.session_state.news_summaries = summary_dict
-                st.session_state.news_keywords = keywords.copy()
-            
-            # Initialize summary cache if not exists
-            if 'summary_cache' not in st.session_state:
-                st.session_state.summary_cache = {}
-            
-            for keyword in keywords:
-                st.subheader(keyword)
-                if keyword in st.session_state.news_summaries:
-                    df_news = st.session_state.news_summaries[keyword]
-                    st.dataframe(df_news)
-                    
-                    # Article selection
-                    titles = df_news['Title'].tolist()
-                    selected_title = st.selectbox(
-                        f"Select article to summarize ({keyword})", 
-                        titles,
-                        key=f"select_{keyword}"
-                    )
-                    
-                    # Get selected article details
-                    selected_article = df_news[df_news['Title'] == selected_title].iloc[0]
-                    time_posted = selected_article['Date']
-                    article_topic = selected_article['Title']
-                    
-                    # Check cache or generate summary
-                    cache_key = f"{keyword}|{selected_title}"
-                    if cache_key not in st.session_state.summary_cache:
-                        if st.button(f"Generate Summary for '{selected_title}'", key=f"btn_{cache_key}"):
-                            with st.spinner("Generating summary..."):
-                                try:
-                                    summary_response = extract_news_summary(article_topic, time_posted)
-                                    st.write(summary_response)
-                                    # Parse the response
-                                    summary = summary_response.split("<summary>")[1].split("</summary>")[0].strip()
-                                    impact = summary_response.split("<impact_on_cpg_industry>")[1].split("</impact_on_cpg_industry>")[0].strip()
-                                    
-                                    st.session_state.summary_cache[cache_key] = {
-                                        'summary': summary,
-                                        'impact': impact
-                                    }
-                                except Exception as e:
-                                    st.error(f"Error generating summary: {e}")
-                    else:
-                        # Display cached summary
-                        cached = st.session_state.summary_cache[cache_key]
-                        st.subheader("Summary")
-                        st.write(cached['summary'])
-                        
-                        st.subheader("Potential Impact on CPG Industry")
-                        st.write(cached['impact'])
-                    
-                    st.markdown("---")
-                    
-        except Exception as e:
-            st.error(f"Error retrieving Summaries: {e}")
-
+                st.write("No data available for the given parameters.")
+        
+        with tabs[1]:
+            st.header("Interest by Region")
+            data_ibr = st.session_state.google_trends_data.get('data_ibr', pd.DataFrame())
+            if not data_ibr.empty:
+                st.dataframe(data_ibr)
+            else:
+                st.write("No data available for the selected region.")
+        
+        with tabs[2]:
+            st.header("Keyword Suggestions")
+            suggestion_keyword = st.text_input("Enter a keyword for suggestions:", "Trump", key="suggestions")
+            if suggestion_keyword:
+                if suggestion_keyword in st.session_state.keyword_suggestions:
+                    suggestions = st.session_state.keyword_suggestions[suggestion_keyword]
+                else:
+                    try:
+                        pytrends = TrendReq(hl='en-US', tz=tz, retries=retries, backoff_factor=backoff_factor)
+                        suggestions = pytrends.suggestions(suggestion_keyword)
+                        st.session_state.keyword_suggestions[suggestion_keyword] = suggestions
+                    except Exception as e:
+                        st.error(f"Error retrieving Keyword Suggestions: {e}")
+                        suggestions = []
+                if suggestions:
+                    st.dataframe(pd.DataFrame(suggestions))
+                else:
+                    st.write("No suggestions found for the given keyword.")
+        
         # with tabs[3]:
         #     try:
-        #         # Initialize summary cache in session state
-        #         if 'summary_cache' not in st.session_state:
-        #             st.session_state.summary_cache = {}
-        
-        #         # Initialize Gemini client
-        #         def get_gemini_client():
-        #             return genai.Client(api_key=os.getenv("GEMINI_API_KEY","AIzaSyCJeqV2cNBq2m-ozeoaOw5JO88FhBfNhwc"))
-        
-        #         # Modified summary extraction function
         #         def extract_news_summary(topic, time_posted):
-        #             utc_time = datetime.utcnow()
-        #             client = get_gemini_client()
+        #               utc_time = datetime.utcnow()
+        #               # create client
+        #               client = genai.Client(api_key=os.getenv("GEMINI_API_KEY","AIzaSyCJeqV2cNBq2m-ozeoaOw5JO88FhBfNhwc"))
                     
-        #             prompt = f"""You are an experienced journalist, who has 30 plus year of experience in providing enriching and true news 
-        #                   to viewers around the world. Given an article topic provided by the user, your task to fetch all the information regarding
-        #                   the article and summerize it crisp and clear for the user. Also understand the information in detailed and provide your view
-        #                   on whether the information has any potential impact on the CPG Industry. You must return the response in the output format.
-                        
-        #                   Output Format:
-        #                   <summary>
-        #                   [The summary goes here]
-        #                   <\summary>
-        #                   <impact_on_cpg_industry>
-        #                   [Your view on the impact on the CPG industry goes here]
-        #                   <\impact_on_cpg_industry>
-                        
-        #                   Instructions:
-        #                   1. Make sure to provide the response in the output format.
-        #                   2. Think step by step and approach the problem intelligently to come with the final response.
-        #                   3. If you think that the information does not have any relation or does not impact the CPG industry, then mention your view as 'Not Applicable'. 
-                        
-        #                   Conversation Date: Today is {utc_time}
-        #                   Time when article was posted: {time_posted}
-        #                   User Article Topic: {topic}
-                        
-        #                   Response:
-        #                   """
+        #               prompt = f"""You are an experienced journalist, who has 30 plus year of experience in providing enriching and true news 
+        #               to viewers around the world. Given an article topic provided by the user, your task to fetch all the information regarding
+        #               the article and summerize it crisp and clear for the user. Also understand the information in detailed and provide your view
+        #               on whether the information has any potential impact on the CPG Industry. You must return the response in the output format.
                     
-        #             response = client.models.generate_content(
-        #                  model='gemini-2.0-flash',
-        #                  contents=prompt,
-        #                  config={"tools": [{"google_search": {}}]},
-        #             )
-        #             print(response.text)
-        #             return response.text
-        
-        #         # Check if we need to refresh news data
+        #               Output Format:
+        #               <summary>
+        #               [The summary goes here]
+        #               <\summary>
+        #               <impact_on_cpg_industry>
+        #               [Your view on the impact on the CPG industry goes here]
+        #               <\impact_on_cpg_industry>
+                    
+        #               Instructions:
+        #               1. Make sure to provide the response in the output format.
+        #               2. Think step by step and approach the problem intelligently to come with the final response.
+        #               3. If you think that the information does not have any relation or does not impact the CPG industry, then mention your view as 'Not Applicable'. 
+                    
+        #               Conversation Date: Today is {utc_time}
+        #               Time when article was posted: {time_posted}
+        #               User Article Topic: {topic}
+                    
+        #               Response:
+        #               """
+        #               # Generate a list of cookie recipes
+        #               response = client.models.generate_content(
+        #                   model='gemini-2.0-flash',
+        #                   contents=prompt,
+        #                   config={"tools": [{"google_search": {}}]},
+        #               )
+                    
+        #               return response.text
+                    
         #         if keywords != st.session_state.get('news_keywords', []):
         #             summary_dict = {}
         #             for keyword in keywords:
@@ -483,14 +364,15 @@ with tabs_overall[0]:
         #                 summary_dict[keyword] = pd.DataFrame(news_data)
         #             st.session_state.news_summaries = summary_dict
         #             st.session_state.news_keywords = keywords.copy()
-        
-        #         # Display news and handle summaries
+                
+        #         # Initialize summary cache if not exists
+        #         if 'summary_cache' not in st.session_state:
+        #             st.session_state.summary_cache = {}
+                
         #         for keyword in keywords:
-        #             st.subheader(f"News for: {keyword}")
+        #             st.subheader(keyword)
         #             if keyword in st.session_state.news_summaries:
         #                 df_news = st.session_state.news_summaries[keyword]
-                        
-        #                 # Display news dataframe
         #                 st.dataframe(df_news)
                         
         #                 # Article selection
@@ -498,74 +380,202 @@ with tabs_overall[0]:
         #                 selected_title = st.selectbox(
         #                     f"Select article to summarize ({keyword})", 
         #                     titles,
-        #                     key=f"select_{hash(keyword)}"  # Unique key per keyword
+        #                     key=f"select_{keyword}"
         #                 )
                         
         #                 # Get selected article details
         #                 selected_article = df_news[df_news['Title'] == selected_title].iloc[0]
-        #                 cache_key = f"{keyword}|{selected_title}"
+        #                 time_posted = selected_article['Date']
+        #                 article_topic = selected_article['Title']
                         
-        #                 # Generate summary button
-        #                 if st.button(f"Generate Summary for '{selected_title}'", 
-        #                            key=f"btn_{hash(cache_key)}"):
-        #                     # Clear previous summary if any
-        #                     if cache_key in st.session_state.summary_cache:
-        #                         del st.session_state.summary_cache[cache_key]
+        #                 # Check cache or generate summary
+        #                 cache_key = f"{keyword}|{selected_title}"
+        #                 if cache_key not in st.session_state.summary_cache:
+        #                     if st.button(f"Generate Summary for '{selected_title}'", key=f"btn_{cache_key}"):
+        #                         with st.spinner("Generating summary..."):
+        #                             try:
+        #                                 summary_response = extract_news_summary(article_topic, time_posted)
+        #                                 st.write(summary_response)
+        #                                 # Parse the response
+        #                                 summary = summary_response.split("<summary>")[1].split("</summary>")[0].strip()
+        #                                 impact = summary_response.split("<impact_on_cpg_industry>")[1].split("</impact_on_cpg_industry>")[0].strip()
+                                        
+        #                                 st.session_state.summary_cache[cache_key] = {
+        #                                     'summary': summary,
+        #                                     'impact': impact
+        #                                 }
+        #                             except Exception as e:
+        #                                 st.error(f"Error generating summary: {e}")
+        #                 else:
+        #                     # Display cached summary
+        #                     cached = st.session_state.summary_cache[cache_key]
+        #                     st.subheader("Summary")
+        #                     st.write(cached['summary'])
                             
-        #                     # Store in session state to persist across reruns
-        #                     st.session_state.active_article = {
-        #                         'key': cache_key,
-        #                         'title': selected_title,
-        #                         'time': selected_article['Date'],
-        #                         'topic': selected_article['Title']
-        #                     }
-        
-        #                 # Check if we have an active article to process
-        #                 if 'active_article' in st.session_state:
-        #                     active = st.session_state.active_article
-                            
-        #                     # Only process if it matches current keyword/article
-        #                     if active['key'] == cache_key:
-        #                         if cache_key not in st.session_state.summary_cache:
-        #                             with st.spinner("Generating summary (this may take 10-15 seconds)..."):
-        #                                 try:
-        #                                     st.write(active['topic'], active['news'])
-        #                                     raw_response = extract_news_summary(
-        #                                         active['topic'], 
-        #                                         active['time']
-        #                                     )
-        #                                     # Parse response
-        #                                     summary = raw_response.split("<summary>")[1].split("</summary>")[0].strip()
-        #                                     impact = raw_response.split("<impact>")[1].split("</impact>")[0].strip()
-                                            
-        #                                     # Store in cache
-        #                                     st.session_state.summary_cache[cache_key] = {
-        #                                         'summary': summary,
-        #                                         'impact': impact
-        #                                     }
-        #                                 except Exception as e:
-        #                                     st.error(f"Error generating summary: {str(e)}")
-        #                                     st.session_state.summary_cache[cache_key] = {
-        #                                         'summary': "Error generating summary",
-        #                                         'impact': "Error analyzing impact"
-        #                                     }
-                                
-        #                         # Display cached results
-        #                         if cache_key in st.session_state.summary_cache:
-        #                             cached = st.session_state.summary_cache[cache_key]
-                                    
-        #                             st.subheader("Summary")
-        #                             st.write(cached['summary'])
-                                    
-        #                             st.subheader("Potential Impact on CPG Industry")
-        #                             st.write(cached['impact'])
-                                    
-        #                             # Add clear button
-        #                             if st.button("Clear Summary", key=f"clear_{hash(cache_key)}"):
-        #                                 del st.session_state.summary_cache[cache_key]
-        #                                 del st.session_state.active_article
-        
+        #                     st.subheader("Potential Impact on CPG Industry")
+        #                     st.write(cached['impact'])
+                        
         #                 st.markdown("---")
-        
+                        
         #     except Exception as e:
-        #         st.error(f"Error in news summary section: {str(e)}")
+        #         st.error(f"Error retrieving Summaries: {e}")
+    
+            with tabs[3]:
+                try:
+                    # Initialize summary cache in session state
+                    if 'summary_cache' not in st.session_state:
+                        st.session_state.summary_cache = {}
+            
+                    # Initialize Gemini client
+                    def get_gemini_client():
+                        return genai.Client(api_key=os.getenv("GEMINI_API_KEY","AIzaSyCJeqV2cNBq2m-ozeoaOw5JO88FhBfNhwc"))
+            
+                    # Modified summary extraction function
+                    def extract_news_summary(topic, time_posted):
+                        utc_time = datetime.utcnow()
+                        client = get_gemini_client()
+                        
+                        prompt = f"""You are an experienced journalist, who has 30 plus year of experience in providing enriching and true news 
+                              to viewers around the world. Given an article topic provided by the user, your task to fetch all the information regarding
+                              the article and summerize it crisp and clear for the user. Also understand the information in detailed and provide your view
+                              on whether the information has any potential impact on the CPG Industry. You must return the response in the output format.
+                            
+                              Output Format:
+                              <summary>
+                              [The summary goes here]
+                              </summary>
+                              <impact_on_cpg_industry>
+                              [Your view on the impact on the CPG industry goes here]
+                              </impact_on_cpg_industry>
+                            
+                              Instructions:
+                              1. Make sure to provide the response in the output format.
+                              2. Think step by step and approach the problem intelligently to come with the final response.
+                              3. If you think that the information does not have any relation or does not impact the CPG industry, then mention your view as 'Not Applicable'. 
+                            
+                              Conversation Date: Today is {utc_time}
+                              Time when article was posted: {time_posted}
+                              User Article Topic: {topic}
+                            
+                              Response:
+                              """
+                        
+                        response = client.models.generate_content(
+                             model='gemini-2.0-flash',
+                             contents=prompt,
+                             config={"tools": [{"google_search": {}}]},
+                        )
+                        return response.text
+            
+                    # Check if we need to refresh news data
+                    if keywords != st.session_state.get('news_keywords', []):
+                        summary_dict = {}
+                        for keyword in keywords:
+                            search = GoogleSerperAPIWrapper(type="news")
+                            results = search.results(keyword)
+                            news_data = {
+                                'Title': [n.get('title', '') for n in results.get('news', [])],
+                                'Link': [n.get('link', '') for n in results.get('news', [])],
+                                'Date': [n.get('date', '') for n in results.get('news', [])],
+                                'Source': [n.get('source', '') for n in results.get('news', [])]
+                            }
+                            summary_dict[keyword] = pd.DataFrame(news_data)
+                        st.session_state.news_summaries = summary_dict
+                        st.session_state.news_keywords = keywords.copy()
+            
+                    # Display news and handle summaries
+                    for keyword in keywords:
+                        st.subheader(f"News for: {keyword}")
+                        if keyword in st.session_state.news_summaries:
+                            df_news = st.session_state.news_summaries[keyword]
+                            
+                            # Display news dataframe
+                            st.dataframe(df_news)
+                            
+                            # Article selection
+                            titles = df_news['Title'].tolist()
+                            selected_title = st.selectbox(
+                                f"Select article to summarize ({keyword})", 
+                                titles,
+                                key=f"select_{hash(keyword)}"  # Unique key per keyword
+                            )
+                            
+                            # Get selected article details
+                            selected_article = df_news[df_news['Title'] == selected_title].iloc[0]
+                            cache_key = f"{keyword}|{selected_title}"
+                            if cache_key in st.session_state.summary_cache:
+                                if st.button("Clear Summary", key=f"clear_{hash(cache_key)}"):
+                                    del st.session_state.summary_cache[cache_key]
+                                    temp_button = st.button(f"Generate Summary for '{selected_title}'", 
+                                       key=f"btn_{hash(cache_key)}")
+                                    break
+                                # del st.session_state.active_article
+                            
+                            # Generate summary button
+                            if st.button(f"Generate Summary for '{selected_title}'", 
+                                       key=f"btn_{hash(cache_key)}"):
+                                # Clear previous summary if any
+                                # if cache_key in st.session_state.summary_cache:
+                                #     del st.session_state.summary_cache[cache_key]
+                                
+                                # Store in session state to persist across reruns
+                                st.session_state.active_article = {
+                                    'key': cache_key,
+                                    'title': selected_title,
+                                    'time': selected_article['Date'],
+                                    'topic': selected_article['Title']
+                                }
+            
+                            # Check if we have an active article to process
+                            if 'active_article' in st.session_state:
+                                active = st.session_state.active_article
+                                
+                                # Only process if it matches current keyword/article
+                                if active['key'] == cache_key:
+                                    # if st.button("Clear Summary", key=f"clear_{hash(cache_key)}"):
+                                    #         del st.session_state.summary_cache[cache_key]
+                                    #         del st.session_state.active_article
+                                        
+                                    if cache_key not in st.session_state.summary_cache:
+                                        with st.spinner("Generating summary (this may take 10-15 seconds)..."):
+                                            try:
+                                                st.write(active['topic'])
+                                                raw_response = extract_news_summary(
+                                                    active['topic'], 
+                                                    active['time']
+                                                )
+                                                # Parse response
+                                                summary = raw_response.split("<summary>")[1].split("</summary>")[0].strip()
+                                                impact = raw_response.split("<impact_on_cpg_industry>")[1].split("</impact_on_cpg_industry>")[0].strip()
+                                                
+                                                # Store in cache
+                                                st.session_state.summary_cache[cache_key] = {
+                                                    'summary': summary,
+                                                    'impact': impact
+                                                }
+                                            except Exception as e:
+                                                st.error(f"Error generating summary: {str(e)}")
+                                                st.session_state.summary_cache[cache_key] = {
+                                                    'summary': "Error generating summary",
+                                                    'impact': "Error analyzing impact"
+                                                }
+                                    
+                                    # Display cached results
+                                    if cache_key in st.session_state.summary_cache:
+                                        cached = st.session_state.summary_cache[cache_key]
+                                        
+                                        st.subheader("Summary")
+                                        st.write(cached['summary'])
+                                        
+                                        st.subheader("Potential Impact on CPG Industry")
+                                        st.write(cached['impact'])
+                                        
+                                        # Add clear button
+                                        # if st.button("Clear Summary", key=f"clear_{hash(cache_key)}"):
+                                        #     del st.session_state.summary_cache[cache_key]
+                                        #     del st.session_state.active_article
+            
+                            st.markdown("---")
+            
+                except Exception as e:
+                    st.error(f"Error in news summary section: {str(e)}")
