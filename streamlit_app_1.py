@@ -266,7 +266,7 @@ with tabs_overall[0]:
                     st.session_state.google_trends_data['data_ibr'] = pd.DataFrame()
             st.session_state.prev_params = current_params
         
-        tabs = st.tabs(["Interest Over Time", "Interest by Region", "Keyword Suggestions", "Summary"])
+        tabs = st.tabs(["Interest Over Time", "Interest by Region", "Summary", "Keyword Suggestions"])
         
         with tabs[0]:
             st.header("Interest Over Time")
@@ -281,11 +281,11 @@ with tabs_overall[0]:
             st.header("Interest by Region")
             data_ibr = st.session_state.google_trends_data.get('data_ibr', pd.DataFrame())
             if not data_ibr.empty:
-                st.dataframe(data_ibr)
+                st.dataframe(data_ibr.sort_values([keywords[0]],ascending=False))
             else:
                 st.write("No data available for the selected region.")
         
-        with tabs[2]:
+        with tabs[3]:
             st.header("Keyword Suggestions")
             suggestion_keyword = st.text_input("Enter a keyword for suggestions:", "Trump", key="suggestions")
             if suggestion_keyword:
@@ -414,7 +414,7 @@ with tabs_overall[0]:
         #     except Exception as e:
         #         st.error(f"Error retrieving Summaries: {e}")
     
-            with tabs[3]:
+            with tabs[2]:
                 try:
                     # Initialize summary cache in session state
                     if 'summary_cache' not in st.session_state:
