@@ -87,80 +87,80 @@ retries = st.sidebar.number_input("Number of Retries:", min_value=0, value=10,
                                  - Defaults to 10""")
 backoff_factor = 0.10
 
-tabs_overall = st.tabs(['Google Trends', 'Economic Factors'])
+tabs_overall = st.tabs(['Google Trends'])
 
-# Economic Factors Tab
-with tabs_overall[1]:
-    if st.session_state.economic_data is None:
-        df = pd.read_excel(r"C:\Users\pranav.reddy\Downloads\Nielsen home care.xlsx")
-        df.sort_values(by=['Month'], inplace=True)
+# # Economic Factors Tab
+# with tabs_overall[1]:
+#     if st.session_state.economic_data is None:
+#         df = pd.read_excel(r"C:\Users\pranav.reddy\Downloads\Nielsen home care.xlsx")
+#         df.sort_values(by=['Month'], inplace=True)
         
-        agg_dict = {
-            '$ Sales': 'sum',
-            'VOL Sales': 'sum',
-            'Inflation Rate': 'mean',
-            'Unemplayment Rate': 'mean',
-            'Savings Rate': 'mean',
-            'Wage Growth': 'mean',
-            'Housing Starts % growth 1MA': 'mean'
-        }
+#         agg_dict = {
+#             '$ Sales': 'sum',
+#             'VOL Sales': 'sum',
+#             'Inflation Rate': 'mean',
+#             'Unemplayment Rate': 'mean',
+#             'Savings Rate': 'mean',
+        #     'Wage Growth': 'mean',
+        #     'Housing Starts % growth 1MA': 'mean'
+        # }
         
-        df_grouped = df.groupby(['PG SUBSECTOR', 'PG MANUFACTURER', 'Month']).agg(agg_dict).reset_index()
-        df_total = df_grouped[(df_grouped['PG SUBSECTOR'] == 'HOME CARE SUBSECTOR') & 
-                              (df_grouped['PG MANUFACTURER'] == 'Total')]
-        df_pg = df_grouped[(df_grouped['PG SUBSECTOR'] == 'HOME CARE SUBSECTOR') & 
-                           (df_grouped['PG MANUFACTURER'] == 'PROCTER & GAMBLE')]
+        # df_grouped = df.groupby(['PG SUBSECTOR', 'PG MANUFACTURER', 'Month']).agg(agg_dict).reset_index()
+        # df_total = df_grouped[(df_grouped['PG SUBSECTOR'] == 'HOME CARE SUBSECTOR') & 
+        #                       (df_grouped['PG MANUFACTURER'] == 'Total')]
+        # df_pg = df_grouped[(df_grouped['PG SUBSECTOR'] == 'HOME CARE SUBSECTOR') & 
+        #                    (df_grouped['PG MANUFACTURER'] == 'PROCTER & GAMBLE')]
         
-        st.session_state.economic_data = {
-            'df_total': df_total,
-            'df_pg': df_pg,
-            'sales_options': ['$ Sales', 'VOL Sales'],
-            'indicator_options': ['Inflation Rate', 'Unemplayment Rate', 'Savings Rate', 
-                                  'Wage Growth', 'Housing Starts % growth 1MA']
-        }
+        # st.session_state.economic_data = {
+        #     'df_total': df_total,
+        #     'df_pg': df_pg,
+        #     'sales_options': ['$ Sales', 'VOL Sales'],
+        #     'indicator_options': ['Inflation Rate', 'Unemplayment Rate', 'Savings Rate', 
+        #                           'Wage Growth', 'Housing Starts % growth 1MA']
+        # }
     
-    economic_data = st.session_state.economic_data
-    selected_sales = st.selectbox("Select Sales Type", economic_data['sales_options'])
-    selected_indicator = st.selectbox("Select Economic Indicator", economic_data['indicator_options'])
+    # economic_data = st.session_state.economic_data
+    # selected_sales = st.selectbox("Select Sales Type", economic_data['sales_options'])
+    # selected_indicator = st.selectbox("Select Economic Indicator", economic_data['indicator_options'])
 
-    def create_dual_axis_plot(data, title):
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=data['Month'],
-            y=data[selected_sales],
-            name=selected_sales,
-            mode='lines+markers',
-            line=dict(color='blue'),
-            yaxis='y1'
-        ))
-        fig.add_trace(go.Scatter(
-            x=data['Month'],
-            y=data[selected_indicator],
-            name=selected_indicator,
-            mode='lines+markers',
-            line=dict(color='red'),
-            yaxis='y2'
-        ))
-        fig.update_layout(
-            title=title,
-            xaxis=dict(title="Month"),
-            yaxis=dict(title=dict(text=selected_sales, font=dict(color='blue'))),
-            yaxis2=dict(title=dict(text=selected_indicator, font=dict(color='red')), 
-                      overlaying='y', side='right'),
-            legend=dict(orientation='h')
-        )
-        return fig
+    # def create_dual_axis_plot(data, title):
+    #     fig = go.Figure()
+    #     fig.add_trace(go.Scatter(
+    #         x=data['Month'],
+    #         y=data[selected_sales],
+    #         name=selected_sales,
+    #         mode='lines+markers',
+    #         line=dict(color='blue'),
+    #         yaxis='y1'
+    #     ))
+    #     fig.add_trace(go.Scatter(
+    #         x=data['Month'],
+    #         y=data[selected_indicator],
+    #         name=selected_indicator,
+            # mode='lines+markers',
+    #         line=dict(color='red'),
+    #         yaxis='y2'
+    #     ))
+    #     fig.update_layout(
+    #         title=title,
+    #         xaxis=dict(title="Month"),
+    #         yaxis=dict(title=dict(text=selected_sales, font=dict(color='blue'))),
+    #         yaxis2=dict(title=dict(text=selected_indicator, font=dict(color='red')), 
+    #                   overlaying='y', side='right'),
+    #         legend=dict(orientation='h')
+    #     )
+    #     return fig
 
-    fig_total = create_dual_axis_plot(economic_data['df_total'], "Trend Plot for TOTAL HOME CARE")
-    fig_pg = create_dual_axis_plot(economic_data['df_pg'], "Trend Plot for PROCTER & GAMBLE HOME CARE")
+    # fig_total = create_dual_axis_plot(economic_data['df_total'], "Trend Plot for TOTAL HOME CARE")
+    # fig_pg = create_dual_axis_plot(economic_data['df_pg'], "Trend Plot for PROCTER & GAMBLE HOME CARE")
     
-    corr_total = economic_data['df_total'][selected_sales].corr(economic_data['df_total'][selected_indicator])
-    corr_pg = economic_data['df_pg'][selected_sales].corr(economic_data['df_pg'][selected_indicator])
+    # corr_total = economic_data['df_total'][selected_sales].corr(economic_data['df_total'][selected_indicator])
+    # corr_pg = economic_data['df_pg'][selected_sales].corr(economic_data['df_pg'][selected_indicator])
     
-    st.plotly_chart(fig_total, use_container_width=True)
-    st.write(f"**Correlation (Total):** {corr_total:.2f}")
-    st.plotly_chart(fig_pg, use_container_width=True)
-    st.write(f"**Correlation (PROCTER & GAMBLE):** {corr_pg:.2f}")
+    # st.plotly_chart(fig_total, use_container_width=True)
+    # st.write(f"**Correlation (Total):** {corr_total:.2f}")
+    # st.plotly_chart(fig_pg, use_container_width=True)
+    # st.write(f"**Correlation (PROCTER & GAMBLE):** {corr_pg:.2f}")
 
 # Google Trends Tab
 with tabs_overall[0]:
