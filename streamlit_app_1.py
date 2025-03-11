@@ -71,13 +71,7 @@ gprop = st.sidebar.text_input(
 )
 
 # Tz Help
-tz = st.sidebar.number_input(
-    "Time Zone Offset (in minutes):", 
-    value=360,
-    help="""**tz**: UTC timezone offset
-    - Example: 360 = US CST (UTC-6)
-    - Calculated as minutes from UTC"""
-)
+tz = 360
 
 # Category Help (if you have a category input)
 retries = st.sidebar.number_input("Number of Retries:", min_value=0, value=10,
