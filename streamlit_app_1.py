@@ -29,16 +29,16 @@ keywords_input = st.sidebar.text_input(
     "Enter keywords (comma separated):", 
     "Inflation",
     help="""**kw_list**: Keywords to analyze (max 5). 
-    - Example: ['Pizza', 'Italian']
+    - Example: For ['Inflation', 'DEI'], enter Inflation, DEI
     - Use pytrends.suggestions() for topic IDs
     - Advanced: Use '/m/025rw19' format for specific topics"""
 )
 keywords = [kw.strip() for kw in keywords_input.split(",") if kw.strip()]
 
 # Timeframe Help
-timeframe = st.sidebar.text_input(
+timeframe = st.sidebar.selectbox(
     "Timeframe (e.g., 'today 12-m'):", 
-    "today 12-m",
+    ["today 12-m", "today 3-m", "today 5-y", "now 7-d", "now 1-H"],
     help="""**timeframe**: Date range for analysis
     - Default: 'today 5-y' (last 5 years)
     - Specific: '2016-12-14 2017-01-25'
@@ -51,9 +51,9 @@ timeframe = st.sidebar.text_input(
 )
 
 # Geo Help
-geo = st.sidebar.text_input(
+geo = st.sidebar.selectbox(
     "Region (Geo code, e.g., 'US'):", 
-    "US",
+    ["US", "GB", "IN", "CN"],
     help="""**geo**: Geographic target
     - Country codes: 'US', 'CN' 
     - States: 'US-AL', 'GB-ENG'
@@ -62,14 +62,17 @@ geo = st.sidebar.text_input(
 )
 
 # Gprop Help
-gprop = st.sidebar.text_input(
-    "Google Property (leave blank for web search):", 
-    "news",
+gprop = st.sidebar.selectbox(
+    "Google Property:", 
+    ["news", "web search", "youtube", "google shopping"],
     help="""**gprop**: Google property filter
     - Options: 'images', 'news', 'youtube', 'froogle'
     - Default: Web search"""
 )
-
+if gprop == "web search":
+    gprop = ""
+elif gprop == "google shopping":
+    gprop = "froogle"
 # Tz Help
 tz = 360
 
